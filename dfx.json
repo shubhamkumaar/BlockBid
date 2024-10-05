@@ -1,7 +1,7 @@
 {
   "canisters": {
     "web3_backend": {
-      "main": "src/web3_backend/main.mo",
+      "main": "src/web3_backend/auction_table.mo",
       "type": "motoko"
     },
     "web3_frontend": {
