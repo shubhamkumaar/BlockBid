@@ -2,8 +2,8 @@ import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import Array "mo:base/Array";
 import Nat "mo:base/Nat";
-import Option "mo:base/Option";
 import Iter "mo:base/Iter";
+import Debug "mo:base/Debug";
 
 actor class AuctionTable() {
     type Auction = {
@@ -24,6 +24,8 @@ actor class AuctionTable() {
     private stable var noOfAuctions : Nat = 0;
 
     public shared(msg) func createAuction(title : Text, description : Text, basePrice : Nat, deadline : Int, image : Text) : async Nat {
+        
+        Debug.print(debug_show(Time.now()));
         assert(deadline > Time.now());
         assert(basePrice > 0);
 
@@ -43,7 +45,7 @@ actor class AuctionTable() {
 
         auctions := Array.thaw(Array.append(Array.freeze(auctions), [?auction]));
         noOfAuctions += 1;
-        noOfAuctions - 1
+        return noOfAuctions - 1;
     };
 
     public shared(msg) func startAuction(id : Nat) : async () {
@@ -153,7 +155,7 @@ actor class AuctionTable() {
                 assert(Time.now() < auction.deadline);
                 assert(bidAmount > auction.maxBid);
                 assert(bidAmount >= auction.basePrice);
-                assert(bidAmount - auction.maxBid >= auction.minIncrement);
+                assert(Nat.sub(bidAmount, auction.maxBid) >= auction.minIncrement);
                 auctions[id] := ?{auction with maxBid = bidAmount; maxBidder = ?msg.caller};
             };
             case null {
@@ -169,7 +171,14 @@ actor class AuctionTable() {
         switch (auctions[id]) {
             case (?auction) {
                 assert(auction.active);
-                assert(Option.isSome(auction.maxBidder) and Option.unwrap(auction.maxBidder) == msg.caller);
+                switch (auction.maxBidder) {
+                    case (?maxBidder) {
+                        assert(maxBidder == msg.caller);
+                    };
+                    case null {
+                        assert(false);
+                    };
+                };
                 // Here you would implement the logic for transferring the bid amount
                 // This might involve cycles, tokens, or other mechanisms specific to your use case
                 auctions[id] := ?{auction with active = false};
