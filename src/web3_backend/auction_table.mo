@@ -1,17 +1,15 @@
 import Principal "mo:base/Principal";
-import Time "mo:base/Time";
 import Array "mo:base/Array";
 import Nat "mo:base/Nat";
 import Iter "mo:base/Iter";
-import Debug "mo:base/Debug";
+import Time "mo:base/Time";
 
 actor class AuctionTable() {
     type Auction = {
         id : Nat;
         owner : Principal;
         title : Text;
-        description : Text;
-        deadline : Int;
+        deadline : Time.Time;
         basePrice : Nat;
         minIncrement : Nat;
         maxBid : Nat;
@@ -23,10 +21,10 @@ actor class AuctionTable() {
     private stable var auctions : [var ?Auction] = [var];
     private stable var noOfAuctions : Nat = 0;
 
-    public shared(msg) func createAuction(title : Text, description : Text, basePrice : Nat, deadline : Int, image : Text) : async Nat {
-        
-        Debug.print(debug_show(Time.now()));
-        assert(deadline > Time.now());
+    public shared(msg) func createAuction(title : Text, description : Text, basePrice : Nat, _deadline : Time.Time, image : Text) : async Nat {
+
+
+        assert(_deadline+Time.now() > Time.now());
         assert(basePrice > 0);
 
         let auction : Auction = {
@@ -34,7 +32,7 @@ actor class AuctionTable() {
             owner = msg.caller;
             title = title;
             description = description;
-            deadline = deadline;
+            deadline = _deadline+Time.now();
             basePrice = basePrice;
             minIncrement = 1;
             maxBid = basePrice;
@@ -101,18 +99,19 @@ actor class AuctionTable() {
     };
 
     public func getAuction(id : Nat) : async ?Auction {
-        assert(id < noOfAuctions);
-        switch (auctions[id]) {
-            case (?auction) {
-                if (auction.deadline < Time.now()) {
-                    await closeAuction(id);
-                };
-                auctions[id]
-            };
-            case null {
-                null
-            };
-        }
+        // assert(id < noOfAuctions);
+        return auctions[id];
+        // switch (auctions[id]) {
+        //     case (?auction) {
+        //         if (auction.deadline < Time.now()) {
+        //             await closeAuction(id);
+        //         };
+        //         auctions[id]
+        //     };
+        //     case null {
+        //         null
+        //     };
+        // }
     };
 
     public func getAuctions() : async [Auction] {
@@ -132,27 +131,35 @@ actor class AuctionTable() {
         for (i in Iter.range(0, noOfAuctions - 1)) {
             switch (auctions[i]) {
                 case (?auction) {
-                    if (auction.deadline < Time.now()) {
-                        await closeAuction(i);
-                    };
                     result[i] := auction;
                 };
-                case null {};
+                case null {
+                    // Handle the case where the auction is null if necessary
+                };
             };
+            // switch (auctions[i]) {
+            //     case (?auction) {
+            //         if (auction.deadline < Time.now()) {
+            //             await closeAuction(i);
+            //         };
+            //         result[i] := auction;
+            //     };
+            //     case null {};
+            // };
         };
         Array.freeze(result)
     };
 
     public shared(msg) func bid(id : Nat, bidAmount : Nat) : async () {
-        assert(id < noOfAuctions);
+        // assert(id < noOfAuctions);
         switch (auctions[id]) {
             case (?auction) {
-                assert(auction.active);
-                if (auction.deadline < Time.now()) {
-                    await closeAuction(id);
-                    assert(false);
-                };
-                assert(Time.now() < auction.deadline);
+                // assert(auction.active);
+                // if (auction.deadline < Time.now()) {
+                //     await closeAuction(id);
+                //     assert(false);
+                // };
+                // assert(Time.now() < auction.deadline);
                 assert(bidAmount > auction.maxBid);
                 assert(bidAmount >= auction.basePrice);
                 assert(Nat.sub(bidAmount, auction.maxBid) >= auction.minIncrement);
@@ -181,6 +188,8 @@ actor class AuctionTable() {
                 };
                 // Here you would implement the logic for transferring the bid amount
                 // This might involve cycles, tokens, or other mechanisms specific to your use case
+
+
                 auctions[id] := ?{auction with active = false};
             };
             case null {
