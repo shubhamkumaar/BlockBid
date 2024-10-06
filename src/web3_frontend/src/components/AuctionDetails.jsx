@@ -1,9 +1,14 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import BidForm from './BidForm.jsx';
-
+import { web3_backend } from '../../../declarations/web3_backend';
 
 const AuctionDetails = ({ auction }) => {
+  
+  const aux = web3_backend.getAuction(auction.id);
+  console.log(aux);
+  
+
   if (!auction) {
     return <Typography variant="body1">Select an auction to see details.</Typography>;
   }
