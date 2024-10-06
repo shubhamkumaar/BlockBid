@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/Navbar.jsx';
+import Navbar from './components/NavBar.jsx';
 import AuctionList from './components/AuctionList.jsx';
 import AuctionDetails from './components/AuctionDetails.jsx';
 import CreateAuctionForm from './components/CreateAuctionForm.jsx';

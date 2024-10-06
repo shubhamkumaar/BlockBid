@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import BidForm from './BidForm.jsx';
 
+
 const AuctionDetails = ({ auction }) => {
   if (!auction) {
     return <Typography variant="body1">Select an auction to see details.</Typography>;

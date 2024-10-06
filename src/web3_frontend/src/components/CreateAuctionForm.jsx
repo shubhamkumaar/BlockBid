@@ -3,6 +3,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import {web3_backend} from '../../../declarations/web3_backend';
 
 const CreateAuctionForm = () => {
   const [title, setTitle] = useState('');
@@ -27,7 +28,7 @@ const CreateAuctionForm = () => {
       description,
       image
     };
-
+    web3_backend.createAuction(auctionData.title,auctionData.description,auctionData.basePrice,auctionData.deadline,auctionData.image);
     // Create auction logic here (API call, etc.)
     console.log(auctionData.deadline)
     setError('');
