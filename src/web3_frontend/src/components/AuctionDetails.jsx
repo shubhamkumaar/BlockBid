@@ -1,20 +1,21 @@
 import React from 'react';
+import { Box, Typography } from '@mui/material';
 import BidForm from './BidForm.jsx';
 
 const AuctionDetails = ({ auction }) => {
   if (!auction) {
-    return <div>Select an auction to see details.</div>;
+    return <Typography variant="body1">Select an auction to see details.</Typography>;
   }
 
   return (
-    <div>
-      <h2>{auction.title}</h2>
-      <p>Current Bid: {auction.maxBid}</p>
-      <p>Time Left: {new Date(auction.deadline).toLocaleString()}</p>
-      <p>Base Price: {auction.basePrice}</p>
-      <p>Description: {auction.description}</p>
+    <Box sx={{ border: '1px solid #ccc', borderRadius: '8px', padding: 2, marginTop: 2 }}>
+      <Typography variant="h6">{auction.title}</Typography>
+      <Typography>Current Bid: {auction.maxBid}</Typography>
+      <Typography>Time Left: {new Date(auction.deadline).toLocaleString()}</Typography>
+      <Typography>Base Price: {auction.basePrice}</Typography>
+      <Typography>Description: {auction.description}</Typography>
       <BidForm auctionId={auction.id} currentBid={auction.maxBid} />
-    </div>
+    </Box>
   );
 };
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
+import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
 
 const AuctionList = ({ onAuctionSelect }) => {
   const [auctions, setAuctions] = useState([]);
 
+  // Uncomment and update the fetch logic as needed
   // useEffect(() => {
   //   axios.get('/api/getAuctions')
   //     .then(response => setAuctions(response.data))
@@ -11,16 +12,16 @@ const AuctionList = ({ onAuctionSelect }) => {
   // }, []);
 
   return (
-    <div>
-      <h2>Ongoing Auctions</h2>
-      <ul>
+    <Box>
+      <Typography variant="h6">Ongoing Auctions</Typography>
+      <List>
         {auctions.map(auction => (
-          <li key={auction.id} onClick={() => onAuctionSelect(auction)}>
-            {auction.title} - Current Bid: {auction.maxBid}
-          </li>
+          <ListItem button key={auction.id} onClick={() => onAuctionSelect(auction)}>
+            <ListItemText primary={auction.title} secondary={`Current Bid: ${auction.maxBid}`} />
+          </ListItem>
         ))}
-      </ul>
-    </div>
+      </List>
+    </Box>
   );
 };
 

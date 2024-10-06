@@ -14,5 +14,15 @@
   "type": "module",
   "workspaces": [
     "src/web3_frontend"
-  ]
+  ],
+  "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.2",
+    "@mui/material": "^6.1.2",
+    "@mui/x-date-pickers": "^7.19.0",
+    "dayjs": "^1.11.13",
+    "react-router-dom": "^6.26.2",
+    "web3": "file:"
+  }
 }

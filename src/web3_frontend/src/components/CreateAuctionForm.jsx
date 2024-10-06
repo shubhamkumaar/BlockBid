@@ -1,56 +1,91 @@
 import React, { useState } from 'react';
+import { Box, Button, TextField, Typography } from '@mui/material';
+import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 const CreateAuctionForm = () => {
   const [title, setTitle] = useState('');
   const [basePrice, setBasePrice] = useState(0);
-  const [deadline, setDeadline] = useState('');
+  const [deadline, setDeadline] = useState(dayjs());
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleCreateAuction = () => {
+    if (!title || basePrice <= 0 || deadline.isBefore(dayjs())) {
+      setError('Please provide valid auction details.');
+      setSuccess('');
+      return;
+    }
+
     const auctionData = {
       title,
       basePrice: parseInt(basePrice),
-      deadline: new Date(deadline).getTime(),
+      deadline: deadline.valueOf(), // Get the timestamp
       description,
       image
     };
 
+    // Create auction logic here (API call, etc.)
+    console.log(auctionData.deadline)
+    setError('');
+    setSuccess('Auction created successfully!');
   };
 
   return (
-    <div>
-      <h3>Create New Auction</h3>
-      <input
-        type="text"
+    <Box sx={{ border: '1px solid #ccc', borderRadius: '8px', padding: 2 }}>
+      <Typography variant="h6">Create New Auction</Typography>
+      <TextField
+        fullWidth
+        label="Auction Title"
         value={title}
-        placeholder="Auction Title"
         onChange={(e) => setTitle(e.target.value)}
+        margin="normal"
       />
-      <input
+      <TextField
         type="number"
+        fullWidth
+        label="Base Price"
         value={basePrice}
-        placeholder="Base Price"
         onChange={(e) => setBasePrice(e.target.value)}
+        margin="normal"
+        inputProps={{ min: "1" }}
       />
-      <input
-        type="datetime-local"
-        value={deadline}
-        onChange={(e) => setDeadline(e.target.value)}
-      />
-      <textarea
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DateTimePicker
+          label="Deadline"
+          value={deadline}
+          onChange={(newValue) => setDeadline(newValue)}
+          renderInput={(params) => (
+            <TextField {...params} fullWidth margin="normal" />
+          )}
+        />
+      </LocalizationProvider>
+      <TextField
+        fullWidth
+        label="Description"
         value={description}
-        placeholder="Description"
         onChange={(e) => setDescription(e.target.value)}
+        margin="normal"
+        multiline
+        rows={4}
       />
-      <input
-        type="text"
+      <TextField
+        fullWidth
+        label="Image URL"
         value={image}
-        placeholder="Image URL"
         onChange={(e) => setImage(e.target.value)}
+        margin="normal"
       />
-      <button onClick={handleCreateAuction}>Create Auction</button>
-    </div>
+      {image && <img src={image} alt="Auction Preview" style={{ width: '200px', marginTop: '10px' }} />}
+      <Button variant="contained" onClick={handleCreateAuction} sx={{ marginTop: 2 }}>
+        Create Auction
+      </Button>
+      {error && <Typography color="error">{error}</Typography>}
+      {success && <Typography color="success.main">{success}</Typography>}
+    </Box>
   );
 };
 
