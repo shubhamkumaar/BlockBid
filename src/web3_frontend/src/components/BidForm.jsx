@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
+import { web3_backend } from '../../../declarations/web3_backend';
 
 const BidForm = ({ auctionId, currentBid }) => {
   const [bidAmount, setBidAmount] = useState(currentBid);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  
   const handleBid = () => {
     if (parseInt(bidAmount) <= currentBid) {
       setError('Your bid must be higher than the current bid.');
@@ -19,7 +21,8 @@ const BidForm = ({ auctionId, currentBid }) => {
     };
 
     // Place bid logic here (API call, etc.)
-
+    web3_backend.bid(bidData.auctionId, bidData.bidAmount);
+    
     setError('');
     setSuccess('Bid placed successfully!');
   };
