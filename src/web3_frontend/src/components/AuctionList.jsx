@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
-import { web3_backend } from '../../../declarations/web3_backend';
+import { Box, Typography, List, ListItem, ListItemText, TextField, Button } from '@mui/material';
 
 const AuctionList = ({ onAuctionSelect }) => {
   const [auctions, setAuctions] = useState([]);
 
-  // Uncomment and update the fetch logic as needed
   useEffect(() => {
-    web3_backend.getAuctions().then(auctions => setAuctions(auctions));
+    const fetchAuctions = async () => {
+      const { web3_backend } = await import('../../../declarations/web3_backend');
+      const auctions = await web3_backend.getAuctions();
+      setAuctions(auctions);
+    };
+
+    fetchAuctions();
   }, []);
 
   return (

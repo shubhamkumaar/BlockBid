@@ -3,19 +3,23 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import {web3_backend} from '../../../declarations/web3_backend';
+
+// Dynamically import the web3_backend module
+const loadWeb3Backend = () => import('../../../declarations/web3_backend');
 
 const CreateAuctionForm = () => {
   const [title, setTitle] = useState('');
-  const [basePrice, setBasePrice] = useState(0);
+  const [basePrice, setBasePrice] = useState('');
   const [deadline, setDeadline] = useState(dayjs());
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleCreateAuction = () => {
-    if (!title || basePrice <= 0 || deadline.isBefore(dayjs())) {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!title || !basePrice || !deadline || !description || !image) {
       setError('Please provide valid auction details.');
       setSuccess('');
       return;
@@ -28,11 +32,18 @@ const CreateAuctionForm = () => {
       description,
       image
     };
-    web3_backend.createAuction(auctionData.title,auctionData.description,auctionData.basePrice,auctionData.deadline,auctionData.image);
-    // Create auction logic here (API call, etc.)
-    console.log(auctionData.deadline)
-    setError('');
-    setSuccess('Auction created successfully!');
+
+    const deadlineDate = new Date(auctionData.deadline);
+    const deadlineSeconds = deadlineDate.getTime() / 1000;
+    try {
+      const web3_backend = await loadWeb3Backend();
+      web3_backend.createAuction(auctionData.title, auctionData.description, auctionData.basePrice, auctionData.deadline, auctionData.image);
+      setError('');
+      setSuccess('Auction created successfully!');
+    } catch (error) {
+      setError('Failed to create auction.');
+      setSuccess('');
+    }
   };
 
   return (
@@ -40,7 +51,7 @@ const CreateAuctionForm = () => {
       <Typography variant="h6">Create New Auction</Typography>
       <TextField
         fullWidth
-        label="Auction Title"
+        label="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         margin="normal"
@@ -81,7 +92,7 @@ const CreateAuctionForm = () => {
         margin="normal"
       />
       {image && <img src={image} alt="Auction Preview" style={{ width: '200px', marginTop: '10px' }} />}
-      <Button variant="contained" onClick={handleCreateAuction} sx={{ marginTop: 2 }}>
+      <Button variant="contained" onClick={handleSubmit} sx={{ marginTop: 2 }}>
         Create Auction
       </Button>
       {error && <Typography color="error">{error}</Typography>}

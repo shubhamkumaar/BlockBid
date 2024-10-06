@@ -24,7 +24,7 @@ actor class AuctionTable() {
 
     public shared(msg) func createAuction(title : Text, description : Text, basePrice : Nat, _deadline : Time.Time, image : Text) : async Nat {
 
-        assert(_deadline+Time.now() > Time.now());
+        assert(_deadline > Time.now()/1000000000);
         assert(basePrice > 0);
 
         let auction : Auction = {

@@ -1,12 +1,20 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import BidForm from './BidForm.jsx';
-import { web3_backend } from '../../../declarations/web3_backend';
 
-const AuctionDetails = ({ auction }) => {
-  
-  const aux = web3_backend.getAuction(auction.id);
-  console.log(aux);
+const loadWeb3Backend = () => import('../../../declarations/web3_backend');
+
+const AuctionDetails = async ({ index }) => {
+  let auction = {};
+  try {
+    const web3_backend = await loadWeb3Backend();
+    auction = await web3_backend.getAuction(auction.id);
+    setError('');
+    setSuccess('Auction Deatils fetched successfully!');
+  } catch (error) {
+    setError('Failed to fetch auction details.');
+    setSuccess('');
+  }
   
 
   if (!auction) {

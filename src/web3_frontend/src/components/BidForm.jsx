@@ -1,48 +1,41 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography } from '@mui/material';
-import { web3_backend } from '../../../declarations/web3_backend';
+import { Box, Typography, TextField, Button } from '@mui/material';
 
-const BidForm = ({ auctionId, currentBid }) => {
-  const [bidAmount, setBidAmount] = useState(currentBid);
+const BidForm = ({ auctionId }) => {
+  const [bidAmount, setBidAmount] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  
-  const handleBid = () => {
-    if (parseInt(bidAmount) <= currentBid) {
-      setError('Your bid must be higher than the current bid.');
+  const handleBid = async () => {
+    if (!bidAmount) {
+      setError('Please enter a valid bid amount.');
       setSuccess('');
       return;
     }
 
-    const bidData = {
-      auctionId,
-      bidAmount: parseInt(bidAmount)
-    };
-
-    // Place bid logic here (API call, etc.)
-    web3_backend.bid(bidData.auctionId, bidData.bidAmount);
-    
-    setError('');
-    setSuccess('Bid placed successfully!');
+    try {
+      const { web3_backend } = await import('../../../declarations/web3_backend');
+      await web3_backend.placeBid(auctionId, parseInt(bidAmount));
+      setError('');
+      setSuccess('Bid placed successfully!');
+    } catch (error) {
+      setError('Failed to place bid.');
+      setSuccess('');
+    }
   };
 
   return (
-    <Box sx={{ marginTop: 2 }}>
+    <Box>
       <Typography variant="h6">Place a Bid</Typography>
       <TextField
-        type="number"
+        fullWidth
         label="Bid Amount"
         value={bidAmount}
         onChange={(e) => setBidAmount(e.target.value)}
-        margin="normal"
-        fullWidth
       />
-      <Button variant="contained" onClick={handleBid} sx={{ marginTop: 2 }}>
-        Place Bid
-      </Button>
+      <Button onClick={handleBid}>Submit Bid</Button>
       {error && <Typography color="error">{error}</Typography>}
-      {success && <Typography color="success.main">{success}</Typography>}
+      {success && <Typography color="primary">{success}</Typography>}
     </Box>
   );
 };
