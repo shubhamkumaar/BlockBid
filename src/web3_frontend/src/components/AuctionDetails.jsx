@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Typography, Card, CardMedia, CardContent, Grid, CircularProgress, TextField, Button } from '@mui/material';
-
-const { web3_backend } = await import('../../../declarations/web3_backend');
+import dayjs from 'dayjs';
 
 const AuctionDetails = () => {
   const { id } = useParams();
@@ -11,13 +10,15 @@ const AuctionDetails = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isActive, setIsActive] = useState(true); // New state for active/deactive toggle
+  const [newDeadline, setNewDeadline] = useState(dayjs());
+  const fetchAuctionDetails = async () => {
+    const { web3_backend } = await import('../../../declarations/web3_backend');
+    const auctionDetails = await web3_backend.getAuction(parseInt(id));
+    setAuction(auctionDetails);
+    setIsActive(auctionDetails[0].active); // Set the active/deactive status of the    
+  };
 
   useEffect(() => {
-    const fetchAuctionDetails = async () => {
-      let auctionDetails = await web3_backend.getAuction(parseInt(id));
-      setAuction(auctionDetails);
-    };
-
     fetchAuctionDetails();
   }, [id]);
 
@@ -33,6 +34,7 @@ const AuctionDetails = () => {
     if (!isActive) return; // If auction is deactive, prevent bid placement
 
     try {
+      const { web3_backend } = await import('../../../declarations/web3_backend');
       await web3_backend.bid(parseInt(id), parseInt(bidAmount));
       setError('');
       setSuccess('Bid placed successfully!');
@@ -43,8 +45,21 @@ const AuctionDetails = () => {
     }
   };
 
-  const toggleAuctionStatus = () => {
-    setIsActive((prev) => !prev); // Toggle the auction's active/deactive status
+  const toggleAuctionStatus = async () => {
+    try {
+      const { web3_backend } = await import('../../../declarations/web3_backend');
+      if(isActive){
+        let temp = await web3_backend.closeAuction(parseInt(id));
+        console.log(temp);
+      }
+      else await web3_backend.startAuction(parseInt(id));
+      setIsActive((prev) => !prev); // Toggle the auction's active/deactive status
+    } catch (error) { 
+      if(error.message.includes('Only the owner can close the auction')) {
+        setError('Only the owner can close the auction.');
+      }
+      else setError('Failed to toggle auction status.');
+    }
   };
 
   if (!auction) {
@@ -57,6 +72,13 @@ const AuctionDetails = () => {
 
   const deadlineFormatted = convertMillisecondsToFormattedDateTime(parseInt(auction[0].deadline));
 
+  const changeDeadline = async()=>{
+    const { web3_backend } = await import('../../../declarations/web3_backend');
+    const deadlineDate = new Date(newDeadline.valueOf());
+    const newTime = deadlineDate.getTime();
+    await web3_backend.changeDeadline(parseInt(id),parseInt(newTime));
+    fetchAuctionDetails();
+  }
   return (
     <Box sx={{ p: 3 }}>
       <Grid container spacing={4} justifyContent="center">

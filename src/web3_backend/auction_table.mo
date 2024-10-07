@@ -4,6 +4,8 @@ import Nat "mo:base/Nat";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
 import Debug "mo:base/Debug";
+import Error "mo:base/Error";
+
 
 actor class AuctionTable() {
     type Auction = {
@@ -49,71 +51,60 @@ actor class AuctionTable() {
     };
 
     public shared(msg) func startAuction(id : Nat) : async () {
-        assert(id < noOfAuctions);
         switch (auctions[id]) {
             case (?auction) {
-                assert(auction.owner == msg.caller);
-                auctions[id] := ?{auction with active = true};
+                if(auction.owner != msg.caller) {
+                    throw Error.reject("Only the owner can start the auction");
+                }else{
+                   auctions[id] := ?{auction with active = true};
+                }
             };
             case null {
-                assert(false);
+                throw Error.reject("Auction not found");
             };
         };
     };
-
-    public shared(msg) func closeAuction(id : Nat) : async () {
-        assert(id < noOfAuctions);
-        switch (auctions[id]) {
-            case (?auction) {
-                assert(auction.owner == msg.caller);
-                auctions[id] := ?{auction with active = false};
-            };
-            case null {
-                assert(false);
-            };
+    
+    public shared(msg) func closeAuction(id: Nat): async Text {
+        let auction = switch (auctions[id]) {
+            case (?a) a;
+            case null throw Error.reject("Auction not found");
         };
-    };
-
-    public shared(msg) func changeDeadline(id : Nat, newDeadline : Int) : async () {
-        assert(id < noOfAuctions);
-        switch (auctions[id]) {
-            case (?auction) {
-                assert(auction.owner == msg.caller);
-                assert(auction.deadline > Time.now());
-                auctions[id] := ?{auction with deadline = newDeadline; active = true};
-            };
-            case null {
-                assert(false);
-            };
-        };
-    };
-
-    public query func getMinIncrement(id : Nat) : async Nat {
-        assert(id < noOfAuctions);
-        switch (auctions[id]) {
-            case (?auction) {
-                auction.minIncrement / 100
-            };
-            case null {
-                0
-            };
+    
+        if (msg.caller != auction.owner) {
+            throw Error.reject("Only the owner can close the auction");
+        } else {
+            // Update the auction to set active to false
+            auctions[id] := ?{auction with active = false};
+            return "Auction closed";
         }
     };
 
+    public shared(msg) func changeDeadline(id : Nat, newDeadline : Int) : async Text {
+        assert(id < noOfAuctions);
+        switch (auctions[id]) {
+            case (?auction) {
+                if (auction.owner != msg.caller) {
+                    throw Error.reject("Only the owner can change the deadline");
+                };
+                assert(auction.owner == msg.caller);
+                if(newDeadline < Time.now()/1000000){
+                    auctions[id] := ?{auction with active = false};
+                    auctions[id] := ?{auction with deadline = newDeadline};
+                    return "Auction has ended";
+                };
+                auctions[id] := ?{auction with deadline = newDeadline; active = true};
+                return "Deadline Changed"
+            };
+            case null {
+                assert(false);
+                return "";
+            };
+        };
+    };
+
     public func getAuction(id : Nat) : async ?Auction {
-        // assert(id < noOfAuctions);
         return auctions[id];
-        // switch (auctions[id]) {
-        //     case (?auction) {
-        //         if (auction.deadline < Time.now()) {
-        //             await closeAuction(id);
-        //         };
-        //         auctions[id]
-        //     };
-        //     case null {
-        //         null
-        //     };
-        // }
     };
 
     public func getAuctions() : async [Auction] {
@@ -133,66 +124,38 @@ actor class AuctionTable() {
         for (i in Iter.range(0, noOfAuctions - 1)) {
             switch (auctions[i]) {
                 case (?auction) {
+                    if(auction.deadline < Time.now()/1000000){
+                        auctions[i] := ?{auction with active = false};
+                    };
                     result[i] := auction;
                 };
                 case null {
-                    // Handle the case where the auction is null if necessary
+                    return [];
                 };
             };
-            // switch (auctions[i]) {
-            //     case (?auction) {
-            //         if (auction.deadline < Time.now()) {
-            //             await closeAuction(i);
-            //         };
-            //         result[i] := auction;
-            //     };
-            //     case null {};
-            // };
         };
         Array.freeze(result)
     };
 
     public shared(msg) func bid(id : Nat, bidAmount : Nat) : async () {
-        // assert(id < noOfAuctions);
         switch (auctions[id]) {
             case (?auction) {
-                // assert(auction.active);
-                // if (auction.deadline < Time.now()) {
-                //     await closeAuction(id);
-                //     assert(false);
-                // };
-                // assert(Time.now() < auction.deadline);
-                assert(bidAmount > auction.maxBid);
-                assert(bidAmount >= auction.basePrice);
-                assert(Nat.sub(bidAmount, auction.maxBid) >= auction.minIncrement);
-                auctions[id] := ?{auction with maxBid = bidAmount; maxBidder = ?msg.caller};
-            };
-            case null {
-                assert(false);
-            };
-        };
-    };
-
-    // Note: Motoko doesn't have direct access to cryptocurrency transfers.
-    // This function would need to be implemented differently, possibly using the Internet Computer's cycles or a separate token system.
-    public shared(msg) func payBid(id : Nat) : async () {
-        assert(id < noOfAuctions);
-        switch (auctions[id]) {
-            case (?auction) {
-                assert(auction.active);
-                switch (auction.maxBidder) {
-                    case (?maxBidder) {
-                        assert(maxBidder == msg.caller);
-                    };
-                    case null {
-                        assert(false);
-                    };
+                if(auction.maxBid>=bidAmount){
+                    throw Error.reject("Bid amount should be greater than the current max bid");
                 };
-                // Here you would implement the logic for transferring the bid amount
-                // This might involve cycles, tokens, or other mechanisms specific to your use case
-
-
-                auctions[id] := ?{auction with active = false};
+                if(auction.deadline < Time.now()/1000000){
+                    auctions[id] := ?{auction with active = false};
+                    throw Error.reject("Auction has ended");
+                };
+                if(auction.active == false){
+                    throw Error.reject("Auction is not active");
+                };
+                assert(auction.active);
+                assert(auction.deadline > Time.now()/1000000);
+                assert(auction.maxBid < bidAmount);
+                // For the development purspose, we are allowing the owner to bid
+                // assert(auction.owner != msg.caller);
+                auctions[id] := ?{auction with maxBid = bidAmount; maxBidder = ?msg.caller};
             };
             case null {
                 assert(false);

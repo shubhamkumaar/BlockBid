@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, List, ListItem, ListItemText, Paper } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, Paper, CircularProgress} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const AuctionList = () => {
-  const [auctions, setAuctions] = useState([]);
+  const [auctions, setAuctions] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +22,33 @@ const AuctionList = () => {
     fetchAuctions();
   }, []);
 
+
+  if (!auctions) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if(auctions.length === 0) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography 
+          variant="h4" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 'bold', 
+            mb: 3, 
+            textAlign: 'center' 
+          }}
+        >
+          No ongoing auctions
+        </Typography>
+      </Box>);
+  }
+
+  
   const handleAuctionClick = (auctionId) => {
     navigate(`/auction/${auctionId}`);
   };
