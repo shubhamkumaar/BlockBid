@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Typography, Card, CardMedia, CardContent, Grid, CircularProgress } from '@mui/material';
+import BidForm from './BidForm'; // Import BidForm component
 
 const AuctionDetails = () => {
   const { id } = useParams();
@@ -70,6 +71,9 @@ const AuctionDetails = () => {
               <Typography variant="h6" sx={{ mt: 1, color: 'text.secondary' }}>
                 Deadline: {deadlineFormatted}
               </Typography>
+
+              {/* Include Bid Form Here */}
+              <BidForm auctionId={auction[0].id} />
             </CardContent>
           </Card>
         </Grid>
