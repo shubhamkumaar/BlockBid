@@ -10,6 +10,7 @@ const AuctionDetails = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isActive, setIsActive] = useState(true); // New state for active/deactive toggle
 
   useEffect(() => {
     const fetchAuctionDetails = async () => {
@@ -29,6 +30,8 @@ const AuctionDetails = () => {
   };
 
   const placeBid = async () => {
+    if (!isActive) return; // If auction is deactive, prevent bid placement
+
     try {
       await web3_backend.bid(parseInt(id), parseInt(bidAmount));
       setError('');
@@ -38,6 +41,10 @@ const AuctionDetails = () => {
       setError('Failed to place bid.');
       setSuccess('');
     }
+  };
+
+  const toggleAuctionStatus = () => {
+    setIsActive((prev) => !prev); // Toggle the auction's active/deactive status
   };
 
   if (!auction) {
@@ -90,7 +97,24 @@ const AuctionDetails = () => {
                 Deadline: {deadlineFormatted}
               </Typography>
 
-              {/* Bid Form */}
+              {/* Toggle Auction Status */}
+              <Button
+                variant="contained"
+                color={isActive ? 'error' : 'success'}
+                onClick={toggleAuctionStatus}
+                sx={{ my: 2 }}
+              >
+                {isActive ? 'Deactivate' : 'Activate'} Auction
+              </Button>
+
+              {/* Display warning message if auction is deactive */}
+              {!isActive && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  Bidding is disabled. Auction is currently deactive.
+                </Typography>
+              )}
+
+              {/* Bid Form (disabled when auction is deactive) */}
               <Box sx={{ my: 2 }}>
                 <TextField
                   label="Enter your bid"
@@ -100,6 +124,7 @@ const AuctionDetails = () => {
                   onChange={(e) => setBidAmount(e.target.value)}
                   fullWidth
                   sx={{ my: 2 }}
+                  disabled={!isActive} // Disable input if auction is deactive
                 />
                 <Button
                   variant="contained"
@@ -107,6 +132,7 @@ const AuctionDetails = () => {
                   onClick={placeBid}
                   fullWidth
                   sx={{ py: 1.5, my: 1 }}
+                  disabled={!isActive} // Disable button if auction is deactive
                 >
                   Place Bid
                 </Button>
