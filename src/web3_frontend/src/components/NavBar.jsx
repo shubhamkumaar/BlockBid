@@ -40,9 +40,9 @@ const Navbar = () => {
         <Button color="inherit" component={Link} to="/create-auction" startIcon={<CreateIcon />}>
           Create Auction
         </Button>
-        <Button color="inherit" component={Link} to="/auctions" startIcon={<ListIcon />}>
+        {/* <Button color="inherit" component={Link} to="/auctions" startIcon={<ListIcon />}>
           Auctions
-        </Button>
+        </Button> */}
       </Toolbar>
       <Menu
         anchorEl={anchorEl}
@@ -54,7 +54,7 @@ const Navbar = () => {
       >
         <MenuItem onClick={handleClose} component={Link} to="/">Home</MenuItem>
         <MenuItem onClick={handleClose} component={Link} to="/create-auction">Create Auction</MenuItem>
-        <MenuItem onClick={handleClose} component={Link} to="/auctions">Auctions</MenuItem>
+        {/* <MenuItem onClick={handleClose} component={Link} to="/auctions">Auctions</MenuItem> */}
       </Menu>
     </AppBar>
   );
