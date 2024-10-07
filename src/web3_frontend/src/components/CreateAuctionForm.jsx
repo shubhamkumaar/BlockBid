@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Paper, Snackbar, Alert } from '@mui/material';
-import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { useNavigate } from 'react-router-dom';
-import dayjs from 'dayjs';
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
 const CreateAuctionForm = () => {
-  const [title, setTitle] = useState('');
-  const [basePrice, setBasePrice] = useState('');
+  const [title, setTitle] = useState("");
+  const [basePrice, setBasePrice] = useState("");
   const [deadline, setDeadline] = useState(dayjs());
-  const [description, setDescription] = useState('');
-  const [image, setImage] = useState('');
-  const [error, setError] = useState('');
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState("");
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false); // For snackbar notification
   const [openSnackbar, setOpenSnackbar] = useState(false); // Snackbar state
 
@@ -21,24 +29,26 @@ const CreateAuctionForm = () => {
     event.preventDefault();
 
     if (!title || !basePrice || !deadline || !description || !image) {
-      setError('Please provide valid auction details.');
+      setError("Please provide valid auction details.");
       return;
     }
 
     const auctionData = {
       title,
       basePrice: parseInt(basePrice),
-      deadline: deadline.valueOf(), // Get the timestamp
+      deadline: deadline.valueOf(),
       description,
       image,
     };
-
+    console.log(auctionData.deadline);
     const deadlineDate = new Date(auctionData.deadline);
     const deadlineSeconds = deadlineDate.getTime();
 
     try {
       const create = async () => {
-        const { web3_backend } = await import('../../../declarations/web3_backend');
+        const { web3_backend } = await import(
+          "../../../declarations/web3_backend"
+        );
         await web3_backend.createAuction(
           auctionData.title,
           auctionData.description,
@@ -49,16 +59,16 @@ const CreateAuctionForm = () => {
       };
       await create();
 
-      setError('');
+      setError("");
       setSuccess(true); // Trigger snackbar success
       setOpenSnackbar(true); // Open snackbar
 
       // Redirect to another page after 2 seconds (e.g., auction list page)
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 2000);
     } catch (error) {
-      setError('Failed to create auction.');
+      setError("Failed to create auction.");
       setOpenSnackbar(true); // Show error snackbar
     }
   };
@@ -69,8 +79,20 @@ const CreateAuctionForm = () => {
   };
 
   return (
-    <Paper sx={{ padding: 4, maxWidth: 600, margin: '0 auto', boxShadow: 3, borderRadius: 2 }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3, textAlign: 'center' }}>
+    <Paper
+      sx={{
+        padding: 4,
+        maxWidth: 600,
+        margin: "0 auto",
+        boxShadow: 3,
+        borderRadius: 2,
+      }}
+    >
+      <Typography
+        variant="h5"
+        gutterBottom
+        sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}
+      >
         Create New Auction
       </Typography>
       <TextField
@@ -88,7 +110,7 @@ const CreateAuctionForm = () => {
         value={basePrice}
         onChange={(e) => setBasePrice(e.target.value)}
         margin="normal"
-        inputProps={{ min: '1' }}
+        inputProps={{ min: "1" }}
         variant="outlined"
       />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -96,7 +118,14 @@ const CreateAuctionForm = () => {
           label="Deadline"
           value={deadline}
           onChange={(newValue) => setDeadline(newValue)}
-          renderInput={(params) => <TextField {...params} fullWidth margin="normal" variant="outlined" />}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              margin="normal"
+              variant="outlined"
+            />
+          )}
         />
       </LocalizationProvider>
       <TextField
@@ -118,31 +147,41 @@ const CreateAuctionForm = () => {
         variant="outlined"
       />
       {image && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
           <img
             src={image}
             alt="Auction Preview"
             style={{
-              width: '200px',
-              height: 'auto',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
+              width: "200px",
+              height: "auto",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
             }}
           />
         </Box>
       )}
-      <Button variant="contained" color="primary" fullWidth sx={{ mt: 3, py: 1.5 }} onClick={handleSubmit}>
+      <Button
+        variant="contained"
+        color="primary"
+        fullWidth
+        sx={{ mt: 3, py: 1.5 }}
+        onClick={handleSubmit}
+      >
         Create Auction
       </Button>
 
       {/* Snackbar Notification */}
-      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
         <Alert
           onClose={handleCloseSnackbar}
-          severity={success ? 'success' : 'error'}
-          sx={{ width: '100%' }}
+          severity={success ? "success" : "error"}
+          sx={{ width: "100%" }}
         >
-          {success ? 'Auction created successfully!' : error}
+          {success ? "Auction created successfully!" : error}
         </Alert>
       </Snackbar>
     </Paper>
