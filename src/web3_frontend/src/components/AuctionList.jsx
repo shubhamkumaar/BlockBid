@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const AuctionList = () => {
@@ -10,7 +10,13 @@ const AuctionList = () => {
     const fetchAuctions = async () => {
       const { web3_backend } = await import('../../../declarations/web3_backend');
       const auctions = await web3_backend.getAuctions();
-      setAuctions(auctions);
+      
+      // Ensure that the auction maxBid is properly formatted
+      const formattedAuctions = auctions.map(auction => ({
+        ...auction,
+        maxBid: auction.maxBid ? auction.maxBid.toString() : 'N/A'  // Convert maxBid to string
+      }));
+      setAuctions(formattedAuctions);
     };
 
     fetchAuctions();
@@ -21,13 +27,44 @@ const AuctionList = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="h6">Ongoing Auctions</Typography>
-      <List>
+    <Box sx={{ p: 3 }}>
+      <Typography 
+        variant="h4" 
+        gutterBottom 
+        sx={{ 
+          fontWeight: 'bold', 
+          mb: 3, 
+          textAlign: 'center' 
+        }}
+      >
+        Ongoing Auctions
+      </Typography>
+      <List sx={{ maxWidth: 600, margin: '0 auto' }}>
         {auctions.map(auction => (
-          <ListItem button key={auction.id} onClick={() => handleAuctionClick(auction.id)}>
-            <ListItemText primary={auction.title} secondary={`Current Bid: ${auction.maxBid}`} />
-          </ListItem>
+          <Paper 
+            key={auction.id} 
+            elevation={3} 
+            sx={{ mb: 2, borderRadius: 2, transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.02)' } }}
+          >
+            <ListItem 
+              button 
+              onClick={() => handleAuctionClick(auction.id)} 
+              sx={{ p: 2 }}
+            >
+              <ListItemText 
+                primary={
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    {auction.title}
+                  </Typography>
+                }
+                secondary={
+                  <Typography variant="body2" color="textSecondary">
+                    Current Bid: {auction.maxBid}
+                  </Typography>
+                }
+              />
+            </ListItem>
+          </Paper>
         ))}
       </List>
     </Box>
