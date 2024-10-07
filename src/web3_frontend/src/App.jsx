@@ -4,6 +4,7 @@ import Navbar from './components/NavBar.jsx';
 import AuctionList from './components/AuctionList.jsx';
 import AuctionDetails from './components/AuctionDetails.jsx';
 import CreateAuctionForm from './components/CreateAuctionForm.jsx';
+import BidForm from './components/BidForm.jsx';
 
 function App() {
   const [selectedAuction, setSelectedAuction] = useState(null);
