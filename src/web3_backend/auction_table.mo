@@ -3,6 +3,7 @@ import Array "mo:base/Array";
 import Nat "mo:base/Nat";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
+import Debug "mo:base/Debug";
 
 actor class AuctionTable() {
     type Auction = {
@@ -23,8 +24,9 @@ actor class AuctionTable() {
     private stable var noOfAuctions : Nat = 0;
 
     public shared(msg) func createAuction(title : Text, description : Text, basePrice : Nat, _deadline : Time.Time, image : Text) : async Nat {
-
-        assert(_deadline > Time.now()/1000000000);
+        Debug.print(debug_show(_deadline));
+        Debug.print(debug_show(Time.now()/1000000));
+        assert(_deadline > Time.now()/1000000);
         assert(basePrice > 0);
 
         let auction : Auction = {
@@ -32,7 +34,7 @@ actor class AuctionTable() {
             owner = msg.caller;
             title = title;
             description = description;
-            deadline = _deadline+Time.now();
+            deadline = _deadline;
             basePrice = basePrice;
             minIncrement = 1;
             maxBid = basePrice;

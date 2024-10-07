@@ -15,7 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<AuctionList onAuctionSelect={setSelectedAuction} />} />
           <Route path="/create-auction" element={<CreateAuctionForm />} />
-          <Route path="/auctions" element={<AuctionDetails auction={selectedAuction} />} />
+          <Route path="/auction/:id" element={<AuctionDetails />} />
         </Routes>
       </div>
     </Router>

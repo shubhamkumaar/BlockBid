@@ -5,8 +5,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
 // Dynamically import the web3_backend module
-const loadWeb3Backend = () => import('../../../declarations/web3_backend');
-
 const CreateAuctionForm = () => {
   const [title, setTitle] = useState('');
   const [basePrice, setBasePrice] = useState('');
@@ -34,10 +32,15 @@ const CreateAuctionForm = () => {
     };
 
     const deadlineDate = new Date(auctionData.deadline);
-    const deadlineSeconds = deadlineDate.getTime() / 1000;
+    const deadlineSeconds = deadlineDate.getTime();
+    console.log(deadlineSeconds);
+    
     try {
-      const web3_backend = await loadWeb3Backend();
-      web3_backend.createAuction(auctionData.title, auctionData.description, auctionData.basePrice, auctionData.deadline, auctionData.image);
+      const create = async ()=>{
+        const { web3_backend } = await import('../../../declarations/web3_backend');
+        let temp = await web3_backend.createAuction(auctionData.title, auctionData.description, auctionData.basePrice, parseInt(deadlineSeconds), auctionData.image);
+      }
+      await create();
       setError('');
       setSuccess('Auction created successfully!');
     } catch (error) {

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, List, ListItem, ListItemText, TextField, Button } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
-const AuctionList = ({ onAuctionSelect }) => {
+const AuctionList = () => {
   const [auctions, setAuctions] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAuctions = async () => {
@@ -14,12 +16,16 @@ const AuctionList = ({ onAuctionSelect }) => {
     fetchAuctions();
   }, []);
 
+  const handleAuctionClick = (auctionId) => {
+    navigate(`/auction/${auctionId}`);
+  };
+
   return (
     <Box>
       <Typography variant="h6">Ongoing Auctions</Typography>
       <List>
         {auctions.map(auction => (
-          <ListItem button key={auction.id} onClick={() => console.log(auction.id)}>
+          <ListItem button key={auction.id} onClick={() => handleAuctionClick(auction.id)}>
             <ListItemText primary={auction.title} secondary={`Current Bid: ${auction.maxBid}`} />
           </ListItem>
         ))}
