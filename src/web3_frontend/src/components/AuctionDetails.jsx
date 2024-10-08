@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const AuctionDetails = () => {
   const { id } = useParams();
@@ -21,8 +22,8 @@ const AuctionDetails = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isActive, setIsActive] = useState(true); // New state for active/deactive toggle
-  // const [newDeadline, setNewDeadline] = useState(dayjs());
-  // const [datePicker, setDatePicker] = useState(false);
+  const [newDeadline, setNewDeadline] = useState(dayjs());
+  const [datePicker, setDatePicker] = useState(false);
   const fetchAuctionDetails = async () => {
     const { web3_backend } = await import("../../../declarations/web3_backend");
     const auctionDetails = await web3_backend.getAuction(parseInt(id));
@@ -33,7 +34,6 @@ const AuctionDetails = () => {
   useEffect(() => {
     fetchAuctionDetails();
   }, [id]);
-  setIsActive(auction[0].active);
   const convertMillisecondsToFormattedDateTime = (milliseconds) => {
     let date = new Date(milliseconds);
     let options = {
@@ -112,18 +112,20 @@ const AuctionDetails = () => {
   );
 
   const changeDeadline = async () => {
-    setDatePicker((prev) => !prev);
     const { web3_backend } = await import("../../../declarations/web3_backend");
     const deadlineDate = new Date(newDeadline.valueOf());
+    console.log(deadlineDate);
+
     const newTime = deadlineDate.getTime();
+
     try {
-      // await web3_backend.changeDeadline(parseInt(id), parseInt(newTime));
+      await web3_backend.changeDeadline(parseInt(id), parseInt(newTime));
+      await fetchAuctionDetails();
     } catch (e) {
       console.log(e);
     }
-
-    fetchAuctionDetails();
   };
+
   return (
     <Box sx={{ p: 3 }}>
       <Grid container spacing={4} justifyContent="center">
@@ -164,12 +166,12 @@ const AuctionDetails = () => {
                 Deadline: {deadlineFormatted}
               </Typography>
 
-              {/* {datePicker && (
+              {datePicker && (
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
                     label="Deadline"
-                    value={deadline}
-                    onChange={(newValue) => setDeadline(newValue)}
+                    value={newDeadline}
+                    onChange={(newValue) => setNewDeadline(newValue)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -181,10 +183,13 @@ const AuctionDetails = () => {
                   />
                 </LocalizationProvider>
               )}
-
+              {datePicker && <Button onClick={changeDeadline}>Change</Button>}
               {!datePicker && (
-                <Button onClick={changeDeadline}>Change Deadline</Button>
-              )} */}
+                <Button onClick={() => setDatePicker((prev) => !prev)}>
+                  Change Deadline
+                </Button>
+              )}
+
               {/* Toggle Auction Status */}
               <Button
                 variant="contained"

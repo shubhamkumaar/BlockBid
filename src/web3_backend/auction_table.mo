@@ -64,7 +64,7 @@ actor class AuctionTable() {
         };
     };
 
-    public shared (msg) func closeAuction(id : Nat) : async Text {
+    public shared (msg) func closeAuction(id : Nat) : async () {
         let auction = switch (auctions[id]) {
             case (?a) a;
             case null throw Error.reject("Auction not found");
@@ -75,48 +75,43 @@ actor class AuctionTable() {
         } else {
             // Update the auction to set active to false
             auctions[id] := ?{ auction with active = false };
-            return "Auction closed";
         };
     };
 
-    // public shared (msg) func changeDeadline(id : Nat, newDeadline : Int) : async Text {
-    //     assert (id < noOfAuctions);
-    //     switch (auctions[id]) {
-    //         case (?auction) {
-    //             if (auction.owner != msg.caller) {
-    //                 throw Error.reject("Only the owner can change the deadline");
-    //             };
-    //             assert (auction.owner == msg.caller);
-    //             if (newDeadline < Time.now() / 1000000) {
-    //                 auctions[id] := ?{ auction with active = false };
-    //                 auctions[id] := ?{ auction with deadline = newDeadline };
-    //                 return "Auction has ended";
-    //             };
-    //             auctions[id] := ?{
-    //                 auction with deadline = newDeadline;
-    //                 active = true;
-    //             };
-    //             return "Deadline Changed";
-    //         };
-    //         case null {
-    //             assert (false);
-    //             return "";
-    //         };
-    //     };
-    // };
+    public shared (msg) func changeDeadline(id : Nat, newDeadline : Int) : async Bool {
+
+        switch (auctions[id]) {
+            case (?auction) {
+                assert (auction.owner == msg.caller);
+                if (auction.owner != msg.caller) {
+                    throw Error.reject("Only the owner can change the deadline");
+                };
+
+                auctions[id] := ?{
+                    auction with deadline = newDeadline;
+                    active = true;
+                };
+                await checkDeadline(id);
+                Debug.print(debug_show(auction.active));
+                return true;
+            };
+            case null {
+                return false;
+            };
+        };
+    };
 
     public query func getAuction(id : Nat) : async ?Auction {
         return auctions[id];
     };
 
-    public func checkDeadline(id : Nat) : async()  {
+    public func checkDeadline(id : Nat) : async () {
         switch (auctions[id]) {
             case (?auction) {
                 if (auction.deadline < Time.now() / 1000000) {
                     if(auction.active) {
                         auctions[id] := ?{ auction with active = false };
                     };
-                    
                 };
             };
             case null {
@@ -124,6 +119,7 @@ actor class AuctionTable() {
             };
         };
     };
+
     public func getAuctions() : async [Auction] {
         let result = Array.init<Auction>(
             noOfAuctions,
@@ -141,7 +137,7 @@ actor class AuctionTable() {
                 active = false;
             },
         );
-        for (i in Iter.range(0, noOfAuctions-1)) {
+        for (i in Iter.range(0, noOfAuctions -1)) {
             await checkDeadline(i);
             switch (auctions[i]) {
                 case (?auction) {
