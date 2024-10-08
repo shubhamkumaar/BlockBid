@@ -101,7 +101,8 @@ actor class AuctionTable() {
         };
     };
 
-    public query func getAuction(id : Nat) : async ?Auction {
+    public func getAuction(id : Nat) : async ?Auction {
+        await checkDeadline(id);
         return auctions[id];
     };
 
@@ -120,7 +121,7 @@ actor class AuctionTable() {
         };
     };
 
-    public func getAuctions() : async [Auction] {
+    public query func getAuctions() : async [Auction] {
         let result = Array.init<Auction>(
             noOfAuctions,
             {
@@ -138,7 +139,7 @@ actor class AuctionTable() {
             },
         );
         for (i in Iter.range(0, noOfAuctions -1)) {
-            await checkDeadline(i);
+            
             switch (auctions[i]) {
                 case (?auction) {
                     result[i] := auction;
