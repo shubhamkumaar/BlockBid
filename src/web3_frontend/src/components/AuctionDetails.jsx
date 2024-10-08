@@ -165,7 +165,7 @@ const AuctionDetails = () => {
               <Typography variant="h6" sx={{ mt: 1, color: "text.secondary" }}>
                 Deadline: {deadlineFormatted}
               </Typography>
-
+<div style={{display: "flex", marginTop:"1.5rem", justifyContent: "center"}}>
               {datePicker && (
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
@@ -183,13 +183,18 @@ const AuctionDetails = () => {
                   />
                 </LocalizationProvider>
               )}
-              {datePicker && <Button onClick={changeDeadline}>Change</Button>}
+              
+              {datePicker && <Button variant="contained"
+                color="primary"
+                style={{margin: "10px" }}
+              onClick={changeDeadline}>Change</Button>}
               {!datePicker && (
                 <Button onClick={() => setDatePicker((prev) => !prev)}>
                   Change Deadline
                 </Button>
               )}
-
+              </div>
+<br />
               {/* Toggle Auction Status */}
               <Button
                 variant="contained"
