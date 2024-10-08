@@ -22,36 +22,35 @@ Ensure you have the following installed on your machine:
 To set up and run the project locally, follow these steps:
 
 ### 1. Install dependencies
-First, install the necessary packages for both the frontend and backend:
-\`\`\`bash
-npm install
-\`\`\`
+First, install the necessary packages for both the frontend and backend: 
+``` bash
+npm install 
+```
 
 ### 2. Start the DFINITY local environment
 Run the following command to start the DFINITY network locally:
-\`\`\`bash
+```bash
 dfx start
-\`\`\`
+```
 
 ### 3. Deploy the Motoko canisters
 After starting the local network, deploy your smart contract canisters using the following command:
-\`\`\`bash
+```bash
 dfx deploy
-\`\`\`
+```
 
 ### 4. Run the React frontend
 Finally, run the frontend React application:
-\`\`\`bash
+```bash
 npm start
-\`\`\`
+```
 
 
 ## Usage
 
 Once the local environment is running, open your browser and navigate to:
-\`\`\`
+
 http://localhost:3000
-\`\`\`
 
 You should see the bidding platform, and you can interact with it by placing bids on items listed in the platform.
 
