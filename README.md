@@ -52,6 +52,9 @@ Once the local environment is running, open your browser and navigate to:
 
 http://localhost:3000
 
+### Candid UI
+https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=3foe2-7qaaa-aaaap-aknjq-cai
+
 You should see the bidding platform, and you can interact with it by placing bids on items listed in the platform.
 
 ## Contributing
